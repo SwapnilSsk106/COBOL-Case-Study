@@ -1,0 +1,163 @@
+       IDENTIFICATION DIVISION.                                         00010000
+       PROGRAM-ID.    MAINCODE.                                         00020000
+       ENVIRONMENT DIVISION.                                            00030000
+       INPUT-OUTPUT SECTION.                                            00040000
+       FILE-CONTROL.                                                    00050000
+      ********************** MASTER DATASET FILE ***********************00051019
+           SELECT INFILE1 ASSIGN TO KSDSFL                              00060032
+           ORGANIZATION IS INDEXED                                      00070000
+           ACCESS MODE IS DYNAMIC                                       00071000
+           RECORD KEY IS PET-ID OF INREC1                               00072001
+           FILE STATUS IS WS-FS1.                                       00080000
+      ********************* SALE TRANSACTION FILE **********************00090019
+           SELECT INFILE2 ASSIGN TO DD2                                 00100000
+           ORGANIZATION IS SEQUENTIAL                                   00110000
+           ACCESS MODE IS SEQUENTIAL                                    00120000
+           FILE STATUS IS WS-FS2.                                       00140000
+      ********************* PROCESSED SALES FILE ***********************00150019
+           SELECT OUTFILE1 ASSIGN TO AS-DD3                             00160032
+           ORGANIZATION IS SEQUENTIAL                                   00170000
+           ACCESS MODE IS SEQUENTIAL                                    00180000
+           FILE STATUS IS WS-FS3.                                       00200000
+      ******************* PENDING TRANSCATIONS FILE ********************00210019
+           SELECT OUTFILE2 ASSIGN TO DD4                                00220000
+           ORGANIZATION IS SEQUENTIAL                                   00230000
+           ACCESS MODE IS SEQUENTIAL                                    00240002
+           FILE STATUS IS WS-FS4.                                       00250000
+      ******************************************************************00251019
+       DATA DIVISION.                                                   00260001
+       FILE SECTION.                                                    00270001
+       FD INFILE1.                                                      00280001
+       01 INREC1.                                                       00290001
+          05 PET-ID          PIC X(3).                                  00300001
+          05 PET-TYP         PIC 9.                                     00310027
+             88 CAT          VALUE 1.                                   00311027
+             88 DOG          VALUE 2.                                   00312027
+             88 BIRD         VALUE 3.                                   00313027
+             88 FISH         VALUE 4.                                   00314027
+          05 BREED           PIC X(10).                                 00320001
+          05 DOP             PIC 9(6).                                  00330001
+          05 COSTPR          PIC 9(4)V9(2).                             00340001
+          05 QUANTO          PIC 99.                                    00350001
+          05 FILLER          PIC X(52).                                 00360001
+       FD INFILE2.                                                      00370001
+       01 INREC2.                                                       00380001
+          05 PET-ID          PIC X(3).                                  00381001
+          05 MRP             PIC 9(4)V9(2).                             00390001
+          05 QUANTC          PIC 99.                                    00400001
+          05 FILLER          PIC X(69).                                 00410001
+       FD OUTFILE1.                                                     00420001
+       01 OUTREC1.                                                      00430001
+          05 PET-ID          PIC X(3).                                  00440001
+          05 DOPC            PIC 9(6).                                  00450001
+          05 QUANTB          PIC 99.                                    00460001
+          05 TOTPRICE        PIC 9(5)V9(2).                             00470033
+          05 LOSSPROF        PIC S9(4)V9(2).                            00480001
+          05 FILLER          PIC X(56).                                 00490033
+       FD OUTFILE2.                                                     00500001
+       01 OUTREC2.                                                      00510001
+          05 PET-ID          PIC X(3).                                  00520001
+          05 MRP             PIC 9(4)V9(2).                             00530001
+          05 QUANTB          PIC 99.                                    00540001
+          05 WS-TEXT         PIC X(40).                                 00541018
+          05 FILLER          PIC X(29).                                 00550018
+       WORKING-STORAGE SECTION.                                         00560001
+       COPY COPYCODE.                                                   00570037
+       PROCEDURE DIVISION.                                              00630003
+       MAIN-PARA.                                                       00640003
+           PERFORM OPEN-PARA                                            00650015
+           CALL 'TEAM6'                                                 00651036
+           STOP RUN.                                                    00660015
+      ********************** OPENING ALL FILES *************************00661019
+      ********************* IN RESPECTIVE MODES ************************00662019
+       OPEN-PARA.                                                       00670003
+           CALL 'SUBPGM'                                                00671007
+           OPEN I-O INFILE1                                             00680003
+           OPEN INPUT INFILE2                                           00690003
+           OPEN OUTPUT OUTFILE1                                         00700008
+           OPEN OUTPUT OUTFILE2                                         00740003
+                IF WS-FS4 = 0                                           00750003
+                 PERFORM READ-ORDER-PARA UNTIL WS-FS2 NOT = 00          00760003
+                ELSE                                                    00770003
+                 DISPLAY " PENDING TRANSACTION FILE OPEN FAILED " WS-FS400780003
+                END-IF                                                  00790003
+           CLOSE OUTFILE2                                               00800025
+           CLOSE OUTFILE1                                               00810025
+           CLOSE INFILE2                                                00820025
+           CLOSE INFILE1.                                               00830030
+      ************ CHECKING THE PET-ID IN SALE PURCHASE FILE ***********00831019
+       READ-ORDER-PARA.                                                 00840003
+           READ INFILE2                                                 00850003
+           AT END DISPLAY " ALL RECORDS ARE PROCESSED "                 00860003
+           NOT AT END                                                   00870003
+            MOVE PET-ID OF INFILE2 TO PET-ID OF INFILE1                 00880003
+            READ INFILE1                                                00890003
+             KEY IS PET-ID OF INFILE1                                   00900003
+             INVALID KEY                                                00910003
+              PERFORM PEND-ORDER-PARA1                                  00911011
+             NOT INVALID KEY                                            00920003
+              IF QUANTC OF INFILE2 IS NOT NUMERIC                       00921017
+               OR MRP OF INFILE2 IS NOT NUMERIC                         00921117
+               OR PET-ID OF INFILE2 IS NOT NUMERIC                      00921220
+                 PERFORM PEND-ORDER-PARA3                               00921317
+              ELSE                                                      00921417
+                 PERFORM ORDER-CHECK-PARA                               00921617
+              END-IF                                                    00923017
+            END-READ                                                    00923117
+           END-READ.                                                    00923217
+      ***********************QUANTITY CHECK PARA************************00923319
+       ORDER-CHECK-PARA.                                                00924017
+              IF QUANTC <= QUANTO                                       00930003
+               DISPLAY " CHECKING REQUIREMENTS " WS-FS2                 00940003
+               PERFORM ACCEPT-ORDER-PARA                                00950003
+               PERFORM UPDATE-RECORD-PARA                               00960003
+              ELSE                                                      00970003
+               PERFORM PEND-ORDER-PARA2                                 00980011
+              END-IF.                                                   00990017
+      ************* ACCEPTING ORDER FROM SALE TRANSCN FILE *************01011019
+       ACCEPT-ORDER-PARA.                                               01020003
+           MOVE PET-ID OF INFILE2 TO PET-ID OF OUTFILE1                 01030003
+           ACCEPT WS-DATE FROM DATE                                     01040014
+           PERFORM DATE-PARA                                            01041014
+           MOVE QUANTC OF INFILE2 TO QUANTB OF OUTFILE1                 01050003
+           COMPUTE TEMPREC1 = ( QUANTC OF INFILE2 ) * ( MRP OF INFILE2 )01060003
+           MOVE TEMPREC1 TO TOTPRICE OF OUTFILE1                        01070003
+           COMPUTE TEMPREC2 = ( MRP OF INFILE2 - COSTPR ) * QUANTC      01080016
+           MOVE TEMPREC2 TO LOSSPROF OF OUTFILE1                        01090003
+           WRITE OUTREC1.                                               01100006
+      ************** UPDATING THE RECORDS IN MASTER DATASET ************01101019
+       UPDATE-RECORD-PARA.                                              01110003
+           MOVE PET-ID OF INFILE2 TO PET-ID OF INFILE1                  01120003
+           COMPUTE TEMPREC3 = QUANTO OF INFILE1 - QUANTC OF INFILE2     01130003
+           MOVE TEMPREC3 TO QUANTO OF INFILE1                           01131005
+           REWRITE INREC1.                                              01140006
+      ***************** LISTING UNPROCESSED TRANSACTIONS ***************01141019
+      ********************* WHEN PET-ID IS INCORRECT *******************01141119
+       PEND-ORDER-PARA1.                                                01142011
+           MOVE " INVALID PET-ID FOUND " TO WS-TEXT OF OUTREC2          01151018
+           MOVE PET-ID OF INFILE2 TO PET-ID OF OUTFILE2                 01160003
+           MOVE MRP OF INFILE2 TO MRP OF OUTFILE2                       01170003
+           MOVE QUANTC OF INFILE2 TO QUANTB OF OUTFILE2                 01180003
+           WRITE OUTREC2.                                               01190006
+      ******************* WHEN REQUIREMENT > AVAILABLE *****************01191019
+       PEND-ORDER-PARA2.                                                01200011
+           MOVE " REQUIREMENT > THAN AVAILABLE " TO WS-TEXT OF OUTREC2  01210012
+           MOVE PET-ID OF INFILE2 TO PET-ID OF OUTFILE2                 01220011
+           MOVE MRP OF INFILE2 TO MRP OF OUTFILE2                       01230011
+           MOVE QUANTC OF INFILE2 TO QUANTB OF OUTFILE2                 01240011
+           WRITE OUTREC2.                                               01250011
+      ******************* WHEN FIELDS ARE NON NUMERIC  *****************01260019
+       PEND-ORDER-PARA3.                                                01270013
+           MOVE " NON-NUMERIC FIELDS " TO WS-TEXT OF OUTREC2            01280013
+           MOVE PET-ID OF INFILE2 TO PET-ID OF OUTFILE2                 01290013
+           MOVE MRP OF INFILE2 TO MRP OF OUTFILE2                       01300013
+           MOVE QUANTC OF INFILE2 TO QUANTB OF OUTFILE2                 01310013
+           WRITE OUTREC2.                                               01320013
+      ********************** DATE UPDATION PARAGRAPH *******************01330019
+       DATE-PARA.                                                       01340014
+           MOVE WS-DATE(1:1) TO DOPC(5:1)                               01350014
+           MOVE WS-DATE(2:1) TO DOPC(6:1)                               01360014
+           MOVE WS-DATE(3:1) TO DOPC(3:1)                               01370014
+           MOVE WS-DATE(4:1) TO DOPC(4:1)                               01380014
+           MOVE WS-DATE(5:1) TO DOPC(1:1)                               01390014
+           MOVE WS-DATE(6:1) TO DOPC(2:1).                              01400014

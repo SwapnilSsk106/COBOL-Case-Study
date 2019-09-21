@@ -1,0 +1,5 @@
+11 00010009 INVALID PET-ID FOUND                                                
+21400910012 INVALID PET-ID FOUND                                                
+31200020098 REQUIREMENT > THAN AVAILABLE                                        
+313   60004 NON-NUMERIC FIELDS                                                  
+412000200 0 NON-NUMERIC FIELDS                                                  
