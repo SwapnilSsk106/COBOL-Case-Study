@@ -1,0 +1,171 @@
+       ID             DIVISION.                                        
+       PROGRAM-ID.    TEAM6.                                            
+       ENVIRONMENT    DIVISION.                                          
+       INPUT-OUTPUT   SECTION.                                           
+       FILE-CONTROL.                                                    
+            SELECT MASTERFL ASSIGN TO KSDSFL                            
+            ORGANIZATION IS INDEXED                                     
+            ACCESS MODE IS RANDOM                                       
+            RECORD KEY IS FS-PETID OF MASTERREC                         
+            FILE STATUS IS FS1.                                         
+            SELECT PROCFL ASSIGN TO AS-DD3                              
+            FILE STATUS IS FS2.                                         
+            SELECT RPTFILE ASSIGN TO DD5                                
+            FILE STATUS IS FS3.                                         
+                                                                        
+       DATA DIVISION.                                                   
+       FILE SECTION.                                                    
+       FD MASTERFL.                                                     
+       01 MASTERREC.                                                    
+          05 FS-PETID             PIC X(3).                             
+          05 FS-PET-TYPE          PIC 9.                                
+          05 FS-BREED             PIC X(10).                            
+          05 FS-DATEPUR           PIC 9(6).                             
+          05 FS-PRICE             PIC 9(4)V9(2).                        
+          05 FS-QTY               PIC 99.                               
+          05                      PIC X(52).                            
+                                                                        
+       FD PROCFL.                                                       
+       01 PROCREC.                                                      
+          05 FS-PETID             PIC X(3).                             
+          05 FS-DATEPUR           PIC 9(6).                             
+          05 FS-QTY               PIC 99.                               
+          05 FS-PRICE             PIC 9(5)V9(2).                        
+          05 FS-PROLOS            PIC S9(4)V9(2).                       
+          05                      PIC X(56).                            
+                                                                        
+       FD RPTFILE.                                                      
+       01 RPTREC                  PIC X(80).                            
+       WORKING-STORAGE SECTION.                                         
+       01 HEAD                    PIC X(80) VALUE " PETID   BREED       
+      -       " DATEPUR       PRICE     QUANTITY    PROFIT  ".          
+       01 DATE11.                                                       
+          05 Y1                   PIC 99.                               
+          05 H1                   PIC 99.                               
+          05 T11                  PIC 99.                               
+       01 DATE1.                                                        
+          05                      PIC X(60).                            
+          05 D.                                                         
+             10 Y                 PIC 99.                               
+             10 V1                PIC X     VALUE '/'.                  
+             10 H                 PIC 99.                               
+             10 V2                PIC X     VALUE '/'.                  
+             10 T1                PIC 99.                               
+       01 WS-PAGE.                                                      
+          02 FILLER               PIC X(60).                            
+          02 PG                   PIC X(10) VALUE 'PAGE NO:'.           
+          02 WS-PG                PIC 99    VALUE 1.                    
+       77 FS1                     PIC 99.                               
+       77 FS2                     PIC 99.                               
+       77 FS3                     PIC 99.                               
+       77 WS-PET                  PIC 9     VALUE 0.                    
+       01 WS-DET.                                                       
+          05                          PIC X(2)   VALUE SPACES.          
+          05 WS-PETID                 PIC X(3).                         
+          05                          PIC X(4)   VALUE SPACES.          
+          05 WS-BREED                 PIC X(10).                        
+          05                          PIC X(4)  VALUE SPACES.           
+          05 WS-DATEPUR               PIC 9(6).                         
+          05                          PIC X(6)  VALUE SPACES.           
+          05 WS-PRICE                 PIC 9(5)V9(2).                    
+          05                          PIC X(6)  VALUE SPACES.           
+          05 WS-QTY                   PIC 99.                           
+          05                          PIC X(8)  VALUE SPACES.           
+          05 WS-PROLOS                PIC 9(4)V9(2).                     
+          05                          PIC X(6)   VALUE SPACES.           
+       77 WS-PET-TYPE                 PIC 9.                             
+       01 WS-PTYPE.                                                      
+          05                          PIC X(15)  VALUE ' PET TYPE '.     
+          05 WS-P                     PIC X(5)   VALUE SPACES.           
+       01 WS-TOT.                                                        
+          05                          PIC X(10)  VALUE 'TOTAL QTY'.      
+          05 WS-TOT-QTY               PIC 99.                            
+       01 WS-PRO.                                                        
+          05                          PIC X(15)   VALUE 'TOTAL P/L'.     
+          05 WS-TOT-TEMP              PIC -9(4).9(2).                    
+       01 WS-LINE                     PIC X(80)   VALUE ALL "-".         
+       01 WS-FLG                      PIC X       VALUE '0'.             
+       77 WS-LCTR                     PIC 99      VALUE 1.               
+       77 WS-TOT-PRO                  PIC S9(4)V9(2).                    
+       PROCEDURE DIVISION.                                               
+       MAIN-PARA.                                                        
+             PERFORM OPEN-PARA                                           
+             PERFORM READ-INPUT UNTIL FS2 NOT = 0                        
+             PERFORM SUMMARY-PARA                                        
+             CLOSE PROCFL RPTFILE                                        
+             CLOSE MASTERFL                                              
+             EXIT PROGRAM.                                               
+       CNTRL-BREAK.                                                      
+             IF WS-FLG = 1                                               
+                PERFORM SUMMARY-PARA                                     
+             END-IF                                                      
+             MOVE 1 TO WS-FLG                                            
+             WRITE RPTREC FROM WS-PAGE                                   
+             EVALUATE TRUE                                               
+                WHEN FS-PET-TYPE = '1'                                   
+                      MOVE 'CAT' TO WS-P                                
+                WHEN FS-PET-TYPE = '2'                                   
+                      MOVE 'DOG' TO WS-P                                 
+                WHEN FS-PET-TYPE = '3'                                  
+                     MOVE 'BIRD' TO WS-P                                
+                WHEN FS-PET-TYPE = '4'                                   
+                     MOVE 'FISH' TO WS-P                                 
+             END-EVALUATE                                                
+             ACCEPT DATE11 FROM DATE                                    
+             PERFORM REVERSE                                             
+             WRITE  RPTREC FROM DATE1                                    
+             WRITE  RPTREC FROM WS-PTYPE                                 
+             WRITE  RPTREC FROM HEAD                                     
+             MOVE 0 TO WS-TOT-PRO                                        
+             MOVE 0 TO WS-TOT-QTY                                        
+             MOVE 0 TO WS-TOT-PRO                                        
+             ADD 1 TO WS-PG                                              
+             MOVE 0 TO WS-LCTR.                                          
+        READ-INPUT.                                                      
+             DISPLAY ' READING RECORDS '                                
+             READ PROCFL                                                
+                 NOT AT END                                            
+                    MOVE FS-PETID OF PROCREC TO FS-PETID OF MASTERREC  
+                    DISPLAY 'READ:' FS-PETID OF MASTERREC              
+                    READ MASTERFL                                        
+                    KEY IS FS-PETID OF MASTERFL                          
+                      NOT INVALID KEY                                   
+                        DISPLAY ' PET TYPE : ' FS-PET-TYPE WS-PET        
+                      IF FS-PET-TYPE NOT = WS-PET-TYPE                 
+                           PERFORM CNTRL-BREAK                          
+                      END-IF                                         
+                      DISPLAY 'KEY NOT FOUND' FS-PETID OF MASTERREC    
+              DISPLAY ' REC READ ' PROCREC                              
+              DISPLAY ' KSDS     ' MASTERREC                           
+              DISPLAY ' ESDS     ' PROCREC                               
+                MOVE FS-PET-TYPE OF MASTERREC TO WS-PET-TYPE            
+                MOVE FS-BREED OF MASTERREC TO WS-BREED                   
+                END-READ                                                 
+                     MOVE FS-PETID OF PROCREC TO WS-PETID                
+                     MOVE FS-DATEPUR OF PROCREC  TO WS-DATEPUR           
+                     MOVE FS-PRICE OF PROCREC   TO WS-PRICE              
+                     MOVE FS-QTY OF PROCREC     TO WS-QTY                
+                     ADD  FS-QTY OF PROCREC     TO WS-TOT-QTY            
+                     MOVE FS-PROLOS OF PROCREC  TO WS-PROLOS             
+                     DISPLAY ' PROFIT/LOSS' FS-PROLOS ' TOT ' WS-TOT-PRO 
+                     ADD FS-PROLOS OF PROCREC TO WS-TOT-PRO              
+                     MOVE WS-TOT-PRO TO WS-TOT-TEMP                      
+                     WRITE RPTREC               FROM WS-DET              
+             END-READ.                                                   
+                 DISPLAY "READ STATUS" FS1 " " FS2 " " FS3 .             
+        OPEN-PARA.                                                       
+             OPEN INPUT MASTERFL                                         
+             OPEN INPUT PROCFL                                          
+             OPEN OUTPUT RPTFILE                                        
+             DISPLAY 'OPEN STATUS' FS1 ' ' FS2 ' ' FS3.                 
+        SUMMARY-PARA.                                                   
+             WRITE  RPTREC FROM WS-LINE                                 
+             WRITE RPTREC FROM WS-TOT                                   
+             MOVE SPACES TO RPTREC                                      
+             WRITE RPTREC FROM WS-PRO                                   
+             MOVE SPACES TO RPTREC                                      
+             WRITE RPTREC.                                              
+       REVERSE.                                                         
+             MOVE Y1 TO T1                                              
+             MOVE T11 TO Y                                              
+             MOVE H1 TO H.                                              
