@@ -1,0 +1,38 @@
+                                                            PAGE NO:  01
+                                                            21/09/19
+ PET TYPE      CAT
+ PETID   BREED        DATEPUR       PRICE     QUANTITY    PROFIT
+  111    SIAMESE       210919      0020000      02        010000
+  112    PERSIAN       210919      0012000      12        048000
+--------------------------------------------------------------------------------
+TOTAL QTY 14
+TOTAL P/L      -0380.00
+
+                                                            PAGE NO:  02
+                                                            21/09/19
+ PET TYPE      DOG
+ PETID   BREED        DATEPUR       PRICE     QUANTITY    PROFIT
+  211    PUG           210919      0021000      06        021000
+  213    BULLDOG       210919      0225000      25        050000
+--------------------------------------------------------------------------------
+TOTAL QTY 31
+TOTAL P/L       0290.00
+
+                                                            PAGE NO:  03
+                                                            21/09/19
+ PET TYPE      BIRD
+ PETID   BREED        DATEPUR       PRICE     QUANTITY    PROFIT
+  313    LOVEBIRDS     210919      0036000      18        036000
+--------------------------------------------------------------------------------
+TOTAL QTY 18
+TOTAL P/L      -0360.00
+
+                                                            PAGE NO:  04
+                                                            21/09/19
+ PET TYPE      FISH
+ PETID   BREED        DATEPUR       PRICE     QUANTITY    PROFIT
+  413    MOLLY         210919      0032200      46        025300
+--------------------------------------------------------------------------------
+TOTAL QTY 46
+TOTAL P/L       0253.00
+
