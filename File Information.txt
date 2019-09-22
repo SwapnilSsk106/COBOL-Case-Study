@@ -1,0 +1,94 @@
+Files created:
+
+1) Master dataset        : OZA067.VSAM.KSDS.DATASET
+   (KSDS Dataset)          Record size(80,80)
+			   Tracks(1,5)
+		           Keys(3,0)
+
+  A) Alternate index     : OZA067.VSAM.KSDSDATA.AIX
+                           Record size(80,80)
+			   Tracks(1,5)
+		           Keys(1,3)
+
+2) Sale transaction file : OZA067.COBOL.ORDER.PS1		    
+   (Physical sequential    Record length 80
+	file)		   Block size    800
+			   Record format FB
+
+3) Processed sale file   : OZA067.VSAM.ESDS.SUCTRANS
+   (ESDS Dataset)          Record size(80,80)
+			   Tracks(1,5)
+
+4) Pending transaction   : OZA067.COBOL.PEND.PS1
+    file                   Record length 80
+   (Physical sequential    Block size    800
+	file)	           Record format FB
+
+5) Main code file        : OZA067.COBOL.PGMS ( MAINCODE )
+   (For accessing and
+     processing the
+     transactions)
+
+6) Report file           : OZA067.COBOL.REPORT.PS1
+   (Report are generated
+     in this file)
+
+7) Sort program          : OZA067.COBOL.PGMS ( SUBPGM )
+   (Program for sorting
+     the sale transaction
+     file)
+
+8) Report generation     : OZA085.COBOL.PGMS ( TEAM6 )
+    program
+
+9) Copy member           : OZA067.COBOL.COPYLIB ( COPYCODE )
+
+Data added:
+
+1) Master dataset :
+   Format used for the data:
+
+   3 Byte  : Pet-ID           ( PIC XXX )
+   1 Byte  : Pet-type         ( PIC X )
+   10 Byte : Breed            ( PIC X(10) )
+   6 Byte  : Date of purchase ( PIC 9(6) DDMMYY FORMAT )
+   6 Byte  : Cost price       ( PIC 9(4)V9(2))
+   2 Byte  : Quantity         ( PIC 99 ) 
+
+  Data in master dataset:
+
+   1111SIAMESE   15091953000099
+   1121PERSIAN   15091953000099
+   1131RAGDOLL   15091953000099
+   2112PUG       15091982000099
+   2122LABRADOR  15091982000099
+   2132BULLDOG   15091982000099
+   3113PARROT    15091935000099
+   3123PELICAN   15091935000099
+   3133LOVEBIRDS 15091935000099  
+   4114GOLD      15091927000099
+   4124GLOWLIGHT 15091927000099
+   4134MOLLY     15091927000099
+
+2) Sale transaction file :
+   Format used for the data:
+
+   3 Byte  : Pet-ID            ( PIC XXX )
+   6 Byte  : MRP               ( PIC 9(4)V9(2) )
+   2 Byte  : Quantity bought   ( PIC 99 )
+
+ Data in sale transaction file:
+
+
+   Before sorting sub-program                 after sorting sub-program
+	11 00010009                                11 00010009
+  	41300070046				   11101000002
+	21300900025				   11200100012
+	31200020098				   21300900025
+	21400910012				   21400910012
+	313   60004				   31200020098
+	11200100012				   313   60004
+	31300200018 				   31300200018
+	11101000002				   41300070046
+	412000200  
+	21100350006
