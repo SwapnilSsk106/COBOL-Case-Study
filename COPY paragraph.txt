@@ -1,0 +1,9 @@
+       77 TEMPREC1           PIC 9(5)V99.                               00560000
+       77 TEMPREC2           PIC S9(4)V99.                              00570000
+       77 TEMPREC3           PIC 9(2).                                  00580000
+       77 TEMPREC4           PIC 9(5)V99.                               00590000
+       77 WS-FS1             PIC 99.                                    00600000
+       77 WS-FS2             PIC 99.                                    00601000
+       77 WS-FS3             PIC 99.                                    00602000
+       77 WS-FS4             PIC 99.                                    00603000
+       77 WS-DATE            PIC 9(6).                                  00604000
